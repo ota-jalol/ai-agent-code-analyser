@@ -217,8 +217,10 @@ describe('${functionName}', () => {
   }
 
   private generateDartTest(filePath: string, functionName: string, testName: string): string {
+    // Extract package name from path for proper import
+    const relativePath = filePath.replace(/\\/g, '/');
     return `import 'package:flutter_test/flutter_test.dart';
-import 'package:${filePath}';
+import '../${relativePath}';
 
 void main() {
   group('${functionName}', () {

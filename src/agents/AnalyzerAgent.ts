@@ -131,16 +131,20 @@ export class AnalyzerAgent {
   private checkMagicNumbers(file: string, content: string): AnalysisIssue[] {
     const issues: AnalysisIssue[] = [];
     const lines = content.split('\n');
+    
+    // Pre-compile regex for better performance
+    const magicNumberRegex = /\b(?<![.\w])((?!0|1|-1)\d{2,})(?![.\w])/g;
 
     lines.forEach((line, index) => {
-      // Look for numbers that aren't 0, 1, -1, or in obvious contexts
-      const magicNumberRegex = /\b(?<![\w.])((?!0|1|-1)\d{2,})\b(?![\w.])/g;
-      let match;
-
-      while ((match = magicNumberRegex.exec(line)) !== null) {
-        // Skip if it's in a comment or string
-        const beforeMatch = line.substring(0, match.index);
-        if (!beforeMatch.includes('//') && !beforeMatch.includes('/*')) {
+      // Skip if it's in a comment or string
+      const beforeComment = line.split('//')[0].split('/*')[0];
+      const inString = beforeComment.includes('"') || beforeComment.includes("'");
+      
+      if (!inString) {
+        let match;
+        magicNumberRegex.lastIndex = 0; // Reset regex
+        
+        while ((match = magicNumberRegex.exec(beforeComment)) !== null) {
           issues.push({
             file,
             line: index + 1,

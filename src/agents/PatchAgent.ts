@@ -183,8 +183,10 @@ export class PatchAgent {
   }
 
   private createDiff(file: string, lineNumber: number, originalLine: string, fixedLine: string): string {
-    return `--- a/${file}
-+++ b/${file}
+    // Generate unified diff format
+    const timestamp = new Date().toISOString();
+    return `--- a/${file}\t${timestamp}
++++ b/${file}\t${timestamp}
 @@ -${lineNumber},1 +${lineNumber},1 @@
 -${originalLine}
 +${fixedLine}
