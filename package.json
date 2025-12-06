@@ -1,0 +1,49 @@
+{
+  "name": "ai-agent-code-analyser",
+  "version": "1.0.0",
+  "description": "Multi-Agent AI System for Real-Time Code Analysis, Testing, and Auto-Fixing",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "ai-code-analyser": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/cli.js",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "keywords": [
+    "ai",
+    "code-analysis",
+    "static-analysis",
+    "testing",
+    "multi-agent",
+    "typescript",
+    "javascript",
+    "dart"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/parser": "^7.23.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "commander": "^11.1.0",
+    "glob": "^10.3.10"
+  },
+  "devDependencies": {
+    "@types/babel__core": "^7.20.3",
+    "@types/node": "^20.9.0",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "eslint": "^8.53.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.6"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
