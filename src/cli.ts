@@ -27,26 +27,26 @@ program
   .action(async (projectPath: string, options: any) => {
     try {
       const absoluteProjectPath = path.resolve(projectPath);
-      const absoluteOutputPath = path.resolve(options.output);
+      const absoluteOutputPath = path.resolve(options.output as string);
 
       logger.info(`Analyzing project: ${absoluteProjectPath}`);
 
       const config: SystemConfig = {
         projectPath: absoluteProjectPath,
         outputPath: absoluteOutputPath,
-        targetLanguages: options.languages.split(',').map((l: string) => l.trim()),
+        targetLanguages: (options.languages as string).split(',').map((l: string) => l.trim()) as any,
         agents: {
           ingestor: { name: 'Ingestor', enabled: true },
           analyzer: { name: 'Analyzer', enabled: true },
           vulnerability: { name: 'Vulnerability Scanner', enabled: true },
-          testWriter: { name: 'Test Writer', enabled: options.tests },
-          executor: { name: 'Test Executor', enabled: options.runTests },
-          patcher: { name: 'Patch Generator', enabled: options.applyFixes },
+          testWriter: { name: 'Test Writer', enabled: Boolean(options.tests) },
+          executor: { name: 'Test Executor', enabled: Boolean(options.runTests) },
+          patcher: { name: 'Patch Generator', enabled: Boolean(options.applyFixes) },
         },
-        generateTests: options.tests,
-        runTests: options.runTests,
-        applyFixes: options.applyFixes,
-        reportFormat: options.format,
+        generateTests: Boolean(options.tests),
+        runTests: Boolean(options.runTests),
+        applyFixes: Boolean(options.applyFixes),
+        reportFormat: options.format as any,
       };
 
       const report = await analyzeProject(config);

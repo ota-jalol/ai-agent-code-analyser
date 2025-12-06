@@ -1,7 +1,5 @@
 import type { TestSuite, TestExecutionReport, TestResult } from '../types/index.js';
 import { Logger } from '../utils/helpers.js';
-import { spawn } from 'child_process';
-import * as path from 'path';
 
 /**
  * Execution Agent
@@ -75,10 +73,8 @@ export class ExecutionAgent {
     throw new Error(`Unsupported test framework: ${suite.framework}`);
   }
 
-  private async runVitestSuite(suite: TestSuite, projectPath: string, startTime: number): Promise<TestResult> {
+  private async runVitestSuite(suite: TestSuite, _projectPath: string, startTime: number): Promise<TestResult> {
     return new Promise((resolve) => {
-      const testPath = path.join(projectPath, suite.file);
-      
       // Simulate test execution
       // In a real implementation, this would actually run vitest
       const passed = Math.floor(suite.tests.length * 0.7);

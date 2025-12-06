@@ -123,7 +123,7 @@ export class TestWriterAgent {
     filePath: string,
     func: ASTNode,
     framework: string,
-    language: string
+    _language: string
   ): TestCase | null {
     if (!func.name) return null;
 
@@ -134,7 +134,7 @@ export class TestWriterAgent {
 
     if (framework === 'vitest' || framework === 'jest') {
       const importPath = filePath.replace(/\.(ts|js)$/, '');
-      code = this.generateJSTest(importPath, functionName, testName, language);
+      code = this.generateJSTest(importPath, functionName, testName);
     } else if (framework === 'flutter_test') {
       code = this.generateDartTest(filePath, functionName, testName);
     }
@@ -152,7 +152,7 @@ export class TestWriterAgent {
     filePath: string,
     cls: ASTNode,
     framework: string,
-    language: string
+    _language: string
   ): TestCase[] {
     const tests: TestCase[] = [];
     const className = cls.name || 'UnknownClass';
@@ -160,7 +160,7 @@ export class TestWriterAgent {
     // Generate constructor test
     tests.push({
       name: `should create instance of ${className}`,
-      code: this.generateConstructorTest(filePath, className, framework, language),
+      code: this.generateConstructorTest(filePath, className, framework),
       framework: framework as any,
       targetFile: filePath,
     });
@@ -175,7 +175,7 @@ export class TestWriterAgent {
         if (method.name && !method.name.startsWith('_')) {
           tests.push({
             name: `should test ${className}.${method.name}`,
-            code: this.generateMethodTest(filePath, className, method.name, framework, language),
+            code: this.generateMethodTest(filePath, className, method.name, framework),
             framework: framework as any,
             targetFile: filePath,
             targetFunction: method.name,
@@ -187,8 +187,7 @@ export class TestWriterAgent {
     return tests;
   }
 
-  private generateJSTest(importPath: string, functionName: string, testName: string, language: string): string {
-    const ext = language === 'typescript' ? 'ts' : 'js';
+  private generateJSTest(importPath: string, functionName: string, testName: string): string {
     return `import { describe, it, expect } from 'vitest';
 import { ${functionName} } from './${importPath}';
 
@@ -248,9 +247,8 @@ void main() {
 `;
   }
 
-  private generateConstructorTest(filePath: string, className: string, framework: string, language: string): string {
+  private generateConstructorTest(filePath: string, className: string, framework: string): string {
     if (framework === 'vitest' || framework === 'jest') {
-      const ext = language === 'typescript' ? 'ts' : 'js';
       return `import { describe, it, expect } from 'vitest';
 import { ${className} } from './${filePath.replace(/\.(ts|js)$/, '')}';
 
@@ -286,8 +284,7 @@ void main() {
     filePath: string,
     className: string,
     methodName: string,
-    framework: string,
-    language: string
+    framework: string
   ): string {
     if (framework === 'vitest' || framework === 'jest') {
       return `import { describe, it, expect, beforeEach } from 'vitest';

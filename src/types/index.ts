@@ -141,7 +141,7 @@ export interface FinalReport {
 export interface AgentConfig {
   name: string;
   enabled: boolean;
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 }
 
 export interface SystemConfig {

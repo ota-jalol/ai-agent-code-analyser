@@ -1,4 +1,4 @@
-import type { AnalysisReport, VulnerabilityReport, TestExecutionReport, PatchReport, CodePatch } from '../types/index.js';
+import type { AnalysisReport, VulnerabilityReport, TestExecutionReport, PatchReport, CodePatch, AnalysisIssue, Vulnerability } from '../types/index.js';
 import { Logger, readFile, writeFile } from '../utils/helpers.js';
 import * as path from 'path';
 
@@ -47,7 +47,7 @@ export class PatchAgent {
     if (testReport) {
       for (const result of testReport.results) {
         for (const failure of result.failures) {
-          const patch = await this.generateTestFailurePatch(result.suite, failure, projectPath);
+          const patch = await this.generateTestFailurePatch(result.suite, failure);
           if (patch) {
             patches.push(patch);
           }
@@ -73,7 +73,7 @@ export class PatchAgent {
 
   private async generateIssuePatch(
     file: string,
-    issue: any,
+    issue: AnalysisIssue,
     projectPath: string
   ): Promise<CodePatch | null> {
     try {
@@ -119,7 +119,7 @@ export class PatchAgent {
 
   private async generateVulnerabilityPatch(
     file: string,
-    vuln: any,
+    vuln: Vulnerability,
     projectPath: string
   ): Promise<CodePatch | null> {
     try {
@@ -174,12 +174,11 @@ export class PatchAgent {
 
   private async generateTestFailurePatch(
     suite: string,
-    failure: any,
-    projectPath: string
+    _failure: { test: string; error: string; stackTrace: string }
   ): Promise<CodePatch | null> {
     // Test failure patches would require more sophisticated analysis
     // For now, just log that we identified a test failure
-    this.logger.info(`Test failure detected in ${suite}: ${failure.test}`);
+    this.logger.info(`Test failure detected in ${suite}: ${_failure.test}`);
     return null;
   }
 

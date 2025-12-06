@@ -3,7 +3,7 @@ import * as path from 'path';
 import { parse } from '@babel/parser';
 import { glob } from 'glob';
 import type { ProjectStructure, FileMetadata, ASTNode } from '../types/index.js';
-import { Logger, generateId, detectLanguage, readFile, extractImports, isCodeFile } from '../utils/helpers.js';
+import { Logger, generateId, detectLanguage, readFile, extractImports } from '../utils/helpers.js';
 
 /**
  * Ingestor Agent
@@ -137,7 +137,7 @@ export class IngestorAgent {
     }
   }
 
-  private convertBabelAST(babelAST: any): ASTNode {
+  private convertBabelAST(babelAST: unknown): ASTNode {
     const convert = (node: any): ASTNode => {
       const astNode: ASTNode = {
         type: node.type,
@@ -170,7 +170,7 @@ export class IngestorAgent {
       return astNode;
     };
 
-    return convert(babelAST);
+    return convert(babelAST as any);
   }
 
   private parseDartSimple(content: string): ASTNode {
