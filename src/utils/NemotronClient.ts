@@ -1,6 +1,46 @@
 import type { ModelConfig } from '../types/index.js';
 import { Logger } from './helpers.js';
 
+// Type definitions for Nemotron API responses
+interface NemotronMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
+interface NemotronChoice {
+  message: NemotronMessage;
+  finish_reason: string;
+  index: number;
+}
+
+interface NemotronResponse {
+  id: string;
+  object: string;
+  created: number;
+  model: string;
+  choices: NemotronChoice[];
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+}
+
+interface AnalysisContext {
+  stage: string;
+  currentResults: {
+    totalIssues?: number;
+    vulnerabilities?: number;
+    critical?: number;
+    high?: number;
+    [key: string]: unknown;
+  };
+  projectInfo: {
+    files?: number;
+    [key: string]: unknown;
+  };
+}
+
 /**
  * NemotronClient - Interface for Nemotron 3 nano AI model
  * Handles communication with NVIDIA's Nemotron model for AI-powered decisions
@@ -72,11 +112,39 @@ export class NemotronClient {
         throw new Error(`Nemotron API error: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json() as any;
+      const data = await response.json() as NemotronResponse;
       return data.choices?.[0]?.message?.content || '';
     } catch (error) {
       this.logger.error('Failed to call Nemotron API', error as Error);
       throw error;
+    }
+  }
+
+  /**
+   * Safely extract and parse JSON from AI response
+   */
+  private parseJSONResponse<T>(response: string, fallback: T): T {
+    try {
+      // Look for JSON blocks marked with code fences
+      const codeFenceMatch = response.match(/```json\s*([\s\S]*?)\s*```/);
+      if (codeFenceMatch) {
+        return JSON.parse(codeFenceMatch[1]);
+      }
+
+      // Look for raw JSON objects with proper validation
+      const jsonMatch = response.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        // Validate that it's actually an object
+        if (typeof parsed === 'object' && parsed !== null) {
+          return parsed as T;
+        }
+      }
+      
+      return fallback;
+    } catch (error) {
+      this.logger.warn('Failed to parse JSON from AI response');
+      return fallback;
     }
   }
 
@@ -105,17 +173,11 @@ Provide detailed analysis in JSON format.`;
         temperature: 0.3 
       });
       
-      // Try to parse JSON response
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
-      }
-      
-      return {
+      return this.parseJSONResponse(response, {
         issues: [],
         suggestions: [],
         severity: 'Low'
-      };
+      });
     } catch (error) {
       this.logger.warn('Nemotron analysis failed, using fallback');
       return {
@@ -129,11 +191,7 @@ Provide detailed analysis in JSON format.`;
   /**
    * Get AI-powered decision for agent orchestration
    */
-  async getAgentDecision(context: {
-    stage: string;
-    currentResults: any;
-    projectInfo: any;
-  }): Promise<{
+  async getAgentDecision(context: AnalysisContext): Promise<{
     nextAction: string;
     reasoning: string;
     priority: string;
@@ -159,16 +217,11 @@ Provide your decision in JSON format.`;
         temperature: 0.5 
       });
       
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
-      }
-      
-      return {
+      return this.parseJSONResponse(response, {
         nextAction: 'continue',
         reasoning: 'Proceed with standard workflow',
         priority: 'normal'
-      };
+      });
     } catch (error) {
       this.logger.warn('Nemotron decision failed, using default workflow');
       return {
@@ -235,16 +288,11 @@ Is this a true security vulnerability? Provide detailed assessment in JSON forma
         temperature: 0.2 
       });
       
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        return JSON.parse(jsonMatch[0]);
-      }
-      
-      return {
+      return this.parseJSONResponse(response, {
         isTruePositive: true,
         severity: 'Medium',
         explanation: 'Unable to assess, flagged for review'
-      };
+      });
     } catch (error) {
       return {
         isTruePositive: true,

@@ -104,6 +104,8 @@ async function fallbackAnalysis() {
     model: {
       provider: 'nemotron',
       modelName: 'nemotron-3-nano',
+      apiEndpoint: '',
+      apiKey: '',
       enabled: false,
     },
 
