@@ -8,6 +8,18 @@ async function advancedAnalysis() {
     projectPath: './my-project',
     outputPath: './detailed-analysis',
     targetLanguages: ['typescript', 'javascript'],
+    
+    // Optional: Enable Nemotron 3 nano for AI-powered analysis
+    model: {
+      provider: 'nemotron',
+      modelName: 'nemotron-3-nano',
+      apiEndpoint: process.env.NEMOTRON_API_ENDPOINT,
+      apiKey: process.env.NEMOTRON_API_KEY,
+      temperature: 0.7,
+      maxTokens: 2048,
+      enabled: !!process.env.NEMOTRON_API_KEY,
+    },
+    
     agents: {
       ingestor: { 
         name: 'Ingestor', 

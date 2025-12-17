@@ -120,6 +120,8 @@ cp .env.example .env
 # Edit .env with your configuration
 ```
 
+**For detailed AI configuration, see [NEMOTRON_GUIDE.md](NEMOTRON_GUIDE.md)**
+
 ## 🔧 Usage
 
 ### CLI Commands
