@@ -123,50 +123,83 @@ This document describes the architecture and implementation details of the multi
 
 ### 7. Supervisor Agent (`SupervisorAgent.ts`)
 
-**Responsibility**: Workflow orchestration and coordination
+**Responsibility**: Workflow orchestration and coordination, powered by Nemotron 3 nano AI
 
 **Features**:
-- Manages all agents
-- Controls execution flow
-- Progress tracking
-- Error handling
+- Manages all agents with AI-powered decision making
+- Controls execution flow dynamically based on analysis results
+- Progress tracking with intelligent prioritization
+- Error handling and recovery
 - Report generation (JSON/HTML/Markdown)
+- Nemotron 3 nano integration for adaptive workflow management
+
+**AI-Powered Capabilities**:
+- Intelligent prioritization of issues and vulnerabilities
+- Context-aware decision making at each workflow stage
+- Adaptive workflow based on analysis results
+- Smart recommendations for next actions
+- Reduced false positives through AI verification
 
 **Workflow**:
-1. Initialize agents
+1. Initialize agents and Nemotron client (if configured)
 2. Ingest project (10% progress)
 3. Analyze code (25% progress)
-4. Scan vulnerabilities (40% progress)
-5. Generate tests (55% progress)
-6. Execute tests (70% progress)
-7. Generate patches (85% progress)
-8. Generate final report (100% progress)
+4. **AI Decision Point**: Assess analysis results
+5. Scan vulnerabilities (40% progress)
+6. **AI Decision Point**: Prioritize security issues
+7. Generate tests (55% progress)
+8. Execute tests (70% progress)
+9. Generate patches (85% progress)
+10. Generate final report (100% progress)
 
-**Output**: `FinalReport` with all analysis results
+**Output**: `FinalReport` with all analysis results and AI insights
 
 ## Data Flow
 
 ```
 User Input (Project Path, Config)
     ↓
-Supervisor Agent
+Supervisor Agent (with Nemotron AI)
     ↓
 [Ingestor Agent] → ProjectStructure
     ↓
 [Analyzer Agent] → AnalysisReport
     ↓
+[Nemotron AI Decision] → Assessment & Prioritization
+    ↓
 [Vulnerability Agent] → VulnerabilityReport
     ↓
-[Test Writer Agent] → TestSuite[]
+[Nemotron AI Decision] → Security Priority Assessment
+    ↓
+[Test Writer Agent] → TestSuite[] (AI-enhanced)
     ↓
 [Execution Agent] → TestExecutionReport
     ↓
 [Patch Agent] → PatchReport
     ↓
-Supervisor Agent → FinalReport
+Supervisor Agent → FinalReport (with AI insights)
     ↓
 Report Files (JSON/HTML/Markdown)
 ```
+
+## AI Model Integration
+
+### Nemotron 3 nano
+
+The system integrates NVIDIA's Nemotron 3 nano model for intelligent decision-making:
+
+**Key Features**:
+- Small, efficient model optimized for code understanding
+- Low latency inference for real-time analysis
+- Context-aware code analysis
+- Intelligent vulnerability assessment
+- Adaptive workflow management
+
+**Usage**:
+- Optional: System works with or without AI model
+- Fallback: Rule-based analysis when AI is unavailable
+- API: Compatible with NVIDIA AI Endpoints or local deployment
+- Security: API keys stored in environment variables
 
 ## Configuration
 
@@ -177,6 +210,15 @@ Report Files (JSON/HTML/Markdown)
   projectPath: string;           // Project to analyze
   outputPath: string;            // Output directory
   targetLanguages: string[];     // Languages to analyze
+  model?: {                      // AI Model configuration (optional)
+    provider: 'nemotron' | 'openai' | 'local';
+    modelName: string;           // e.g., 'nemotron-3-nano'
+    apiEndpoint?: string;        // API endpoint URL
+    apiKey?: string;             // API authentication key
+    temperature?: number;        // Model temperature (0-1)
+    maxTokens?: number;          // Max tokens per request
+    enabled: boolean;            // Enable/disable AI features
+  };
   agents: {                      // Agent enable/disable
     ingestor: AgentConfig;
     analyzer: AgentConfig;

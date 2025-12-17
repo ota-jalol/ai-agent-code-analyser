@@ -7,9 +7,11 @@ Multi-Agent AI System for Real-Time Code Analysis, Testing, and Auto-Fixing
 A comprehensive multi-agent AI system capable of analyzing entire projects written in JavaScript, TypeScript, and Dart. The system detects bugs, vulnerabilities, logical issues, performance problems, generates automated tests, runs them, produces reports, and applies fixes automatically.
 
 ### Base Model
-- **Qwen2.5-Coder** (optimized for code understanding, generation, refactoring)
-- Compatible with local embeddings and vector databases (Qdrant/Weaviate)
-- RAG pipelines for code + documentation context
+- **Nemotron 3 nano** (NVIDIA's optimized small language model for code understanding and generation)
+- AI-powered intelligent agent orchestration and decision-making
+- Compatible with local deployment and NVIDIA AI Endpoints
+- Fallback to rule-based analysis when AI model is not available
+- RAG pipelines for code + documentation context (coming soon)
 
 ## 🧩 Architecture
 
@@ -52,10 +54,11 @@ A comprehensive multi-agent AI system capable of analyzing entire projects writt
 
 7. **Supervisor Agent**
    - Manages all agents
-   - Delegates tasks
+   - Delegates tasks with AI-powered decision making via Nemotron 3 nano
    - Ensures correct workflow order
-   - Evaluates conflicting results
+   - Evaluates conflicting results intelligently
    - Maintains real-time operation mode
+   - Provides intelligent prioritization based on analysis results
 
 ## 🚀 Installation
 
@@ -74,6 +77,47 @@ yarn install
 
 ```bash
 pnpm build
+```
+
+## 🤖 AI Model Configuration
+
+### Nemotron 3 nano Setup
+
+The system uses NVIDIA's Nemotron 3 nano for intelligent agent management and decision-making.
+
+#### Option 1: NVIDIA AI Endpoints (Recommended)
+
+```bash
+# Get your API key from https://build.nvidia.com/
+export NEMOTRON_API_ENDPOINT=https://integrate.api.nvidia.com/v1
+export NEMOTRON_API_KEY=your_api_key_here
+```
+
+#### Option 2: Local Deployment
+
+```bash
+# Run Nemotron locally (requires NVIDIA GPU)
+export NEMOTRON_API_ENDPOINT=http://localhost:8000
+export NEMOTRON_API_KEY=local
+```
+
+#### Option 3: Without AI (Fallback Mode)
+
+The system works without AI configuration, using rule-based analysis:
+
+```bash
+# Simply run without setting NEMOTRON_API_KEY
+# The system will use traditional static analysis
+pnpm start analyze ./path/to/project
+```
+
+### Configuration File
+
+Create a `.env` file in the project root:
+
+```bash
+cp .env.example .env
+# Edit .env with your configuration
 ```
 
 ## 🔧 Usage
@@ -119,7 +163,18 @@ import { analyzeProject, createDefaultConfig } from 'ai-agent-code-analyser';
 
 const config = createDefaultConfig('./path/to/project');
 
-// Customize configuration
+// Configure AI model (Nemotron 3 nano)
+config.model = {
+  provider: 'nemotron',
+  modelName: 'nemotron-3-nano',
+  apiEndpoint: 'https://integrate.api.nvidia.com/v1',
+  apiKey: process.env.NEMOTRON_API_KEY,
+  temperature: 0.7,
+  maxTokens: 2048,
+  enabled: true,
+};
+
+// Customize other settings
 config.generateTests = true;
 config.runTests = true;
 config.applyFixes = false;
@@ -129,6 +184,15 @@ const report = await analyzeProject(config);
 
 console.log(`Found ${report.vulnerabilityReport.totalVulnerabilities} vulnerabilities`);
 ```
+
+### AI-Powered Features
+
+When Nemotron 3 nano is enabled:
+- **Intelligent Prioritization**: AI decides which issues to address first
+- **Context-Aware Analysis**: Better understanding of code intent
+- **Smart Test Generation**: AI generates more comprehensive test cases
+- **Vulnerability Assessment**: Reduced false positives through AI verification
+- **Adaptive Workflow**: Dynamic decision-making based on analysis results
 
 ## 📊 Output
 
@@ -215,6 +279,7 @@ The system automatically generates:
 
 ## 🛠 Technology Stack
 
+- **AI Model**: Nemotron 3 nano (NVIDIA)
 - **TypeScript** - Type-safe implementation
 - **Babel Parser** - JavaScript/TypeScript AST parsing
 - **Vitest** - Modern test framework
@@ -224,6 +289,7 @@ The system automatically generates:
 
 ## 🎯 Behavior Rules
 
+- AI-powered intelligent decision-making when Nemotron is enabled
 - Always check full project context before generating tests or fixes
 - Always produce structured output
 - Never guess file structure; use real scanned structure
@@ -285,7 +351,8 @@ pnpm start analyze ./mening-proyektim \
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [CWE List](https://cwe.mitre.org/)
-- [Qwen2.5-Coder](https://github.com/QwenLM/Qwen2.5-Coder)
+- [Nemotron 3 nano](https://build.nvidia.com/) - NVIDIA AI Endpoints
+- [Nemotron Models](https://developer.nvidia.com/nemotron) - NVIDIA Developer
 
 ## ⚡ Performance
 

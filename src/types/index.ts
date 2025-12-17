@@ -144,10 +144,21 @@ export interface AgentConfig {
   options?: Record<string, unknown>;
 }
 
+export interface ModelConfig {
+  provider: 'nemotron' | 'openai' | 'local';
+  modelName: string;
+  apiEndpoint?: string;
+  apiKey?: string;
+  temperature?: number;
+  maxTokens?: number;
+  enabled: boolean;
+}
+
 export interface SystemConfig {
   projectPath: string;
   outputPath: string;
   targetLanguages: ('javascript' | 'typescript' | 'dart')[];
+  model?: ModelConfig;
   agents: {
     ingestor: AgentConfig;
     analyzer: AgentConfig;

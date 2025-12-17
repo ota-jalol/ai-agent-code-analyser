@@ -23,6 +23,15 @@ export function createDefaultConfig(projectPath: string): SystemConfig {
     projectPath,
     outputPath: './output',
     targetLanguages: ['javascript', 'typescript', 'dart'],
+    model: {
+      provider: 'nemotron',
+      modelName: 'nemotron-3-nano',
+      apiEndpoint: process.env.NEMOTRON_API_ENDPOINT || 'http://localhost:8000',
+      apiKey: process.env.NEMOTRON_API_KEY,
+      temperature: 0.7,
+      maxTokens: 2048,
+      enabled: !!process.env.NEMOTRON_API_KEY,
+    },
     agents: {
       ingestor: { name: 'Ingestor', enabled: true },
       analyzer: { name: 'Analyzer', enabled: true },
