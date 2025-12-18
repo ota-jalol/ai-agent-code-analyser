@@ -60,6 +60,109 @@ A comprehensive multi-agent AI system capable of analyzing entire projects writt
    - Maintains real-time operation mode
    - Provides intelligent prioritization based on analysis results
 
+## 🚀 Getting Started / Ishga Tushirish
+
+### Quick Start (5 minutes)
+
+Follow these steps to get the system running:
+
+#### 1. Prerequisites / Talablar
+```bash
+# Ensure you have Node.js 18+ installed
+node --version  # Should be 18.0.0 or higher
+
+# Ensure you have npm or pnpm installed
+npm --version   # or
+pnpm --version
+```
+
+#### 2. Clone and Install / Yuklab Olish va O'rnatish
+```bash
+# Clone the repository
+git clone https://github.com/ota-jalol/ai-agent-code-analyser.git
+cd ai-agent-code-analyser
+
+# Install dependencies
+npm install
+# or with pnpm (recommended / tavsiya etiladi)
+pnpm install
+```
+
+#### 3. Build the Project / Loyihani Qurish
+```bash
+# Build TypeScript to JavaScript
+npm run build
+# or
+pnpm build
+```
+
+#### 4. Run Your First Analysis / Birinchi Tahlilni Ishga Tushirish
+
+**Option A: Analyze without AI (fastest, no setup required)**
+```bash
+# Analyze your project (replace ./your-project with your path)
+npm start analyze ./your-project --output ./results --format html
+
+# Uzbekcha: O'z loyihangizni tahlil qiling
+# ./your-project ni o'z loyiha yo'lingiz bilan almashtiring
+```
+
+**Option B: With AI (Nemotron 3 nano)**
+```bash
+# 1. Get API key from https://build.nvidia.com/
+# 2. Set environment variable
+export NEMOTRON_API_KEY=your_api_key_here
+
+# 3. Run analysis with AI
+npm start analyze ./your-project --output ./results --format html
+
+# Uzbekcha: AI bilan tahlil
+# 1. https://build.nvidia.com/ saytidan API kalitini oling
+# 2. Muhit o'zgaruvchisini sozlang
+# 3. Tahlilni ishga tushiring
+```
+
+#### 5. View Results / Natijalarni Ko'rish
+```bash
+# Open the HTML report in your browser
+open ./results/reports/report-*.html
+# or on Linux
+xdg-open ./results/reports/report-*.html
+
+# Uzbekcha: Hisobot faylini brauzeringizda oching
+```
+
+### Complete Example / To'liq Misol
+
+```bash
+# Full workflow / To'liq jarayon
+git clone https://github.com/ota-jalol/ai-agent-code-analyser.git
+cd ai-agent-code-analyser
+npm install
+npm run build
+npm start analyze ./src --output ./my-results --format html
+open ./my-results/reports/report-*.html
+```
+
+### Common Commands / Umumiy Buyruqlar
+
+```bash
+# Basic analysis / Oddiy tahlil
+npm start analyze ./path/to/project
+
+# With tests / Testlar bilan
+npm start analyze ./path/to/project --run-tests
+
+# With auto-fixes / Avtomatik tuzatishlar bilan
+npm start analyze ./path/to/project --apply-fixes
+
+# Specific language / Muayyan til
+npm start analyze ./path/to/project --languages typescript
+
+# JSON format / JSON formati
+npm start analyze ./path/to/project --format json
+```
+
 ## 🚀 Installation
 
 ```bash
@@ -355,6 +458,87 @@ pnpm start analyze ./mening-proyektim \
 - [CWE List](https://cwe.mitre.org/)
 - [Nemotron 3 nano](https://build.nvidia.com/) - NVIDIA AI Endpoints
 - [Nemotron Models](https://developer.nvidia.com/nemotron) - NVIDIA Developer
+
+## 🐛 Troubleshooting / Muammolarni Hal Qilish
+
+### Common Issues / Keng Tarqalgan Muammolar
+
+#### "Module not found" error
+```bash
+# Solution: Make sure you built the project
+npm run build
+
+# Yechim: Loyiha qurilganiga ishonch hosil qiling
+pnpm build
+```
+
+#### "Command not found: ai-code-analyser"
+```bash
+# Solution: Use npm start instead
+npm start analyze ./your-project
+
+# Yechim: npm start dan foydalaning
+```
+
+#### Build fails with TypeScript errors
+```bash
+# Solution: Clean and reinstall dependencies
+rm -rf node_modules dist
+npm install
+npm run build
+
+# Yechim: Bog'liqliklarni qayta o'rnating
+```
+
+#### AI features not working
+```bash
+# Solution: Check your API key is set
+echo $NEMOTRON_API_KEY
+
+# If empty, set it:
+export NEMOTRON_API_KEY=your_key_here
+
+# Yechim: API kalitingiz o'rnatilganligini tekshiring
+```
+
+#### Analysis runs but finds no files
+```bash
+# Solution: Check your path is correct
+ls ./path/to/project
+
+# Make sure the path contains .js, .ts, or .dart files
+# node_modules folders are automatically excluded
+
+# Yechim: Yo'lingiz to'g'riligini tekshiring
+```
+
+#### Permission denied errors
+```bash
+# Solution: Check file permissions
+chmod +x dist/cli.js
+
+# Or run with node explicitly
+node dist/cli.js analyze ./project
+
+# Yechim: Fayl ruxsatlarini tekshiring
+```
+
+### Getting Help / Yordam Olish
+
+If you encounter issues:
+1. Check the [QUICKSTART.md](QUICKSTART.md) guide
+2. Review [NEMOTRON_GUIDE.md](NEMOTRON_GUIDE.md) for AI setup
+3. Check [ARCHITECTURE.md](ARCHITECTURE.md) for technical details
+4. Open an issue on GitHub with:
+   - Your Node.js version (`node --version`)
+   - Error messages
+   - Steps to reproduce
+
+Agar muammoga duch kelsangiz:
+1. [QUICKSTART.md](QUICKSTART.md) qo'llanmasini ko'rib chiqing
+2. AI sozlash uchun [NEMOTRON_GUIDE.md](NEMOTRON_GUIDE.md) ni o'qing
+3. Texnik ma'lumotlar uchun [ARCHITECTURE.md](ARCHITECTURE.md) ga qarang
+4. GitHub'da muammoni yozing (node versiyasi va xato xabarlarini kiriting)
 
 ## ⚡ Performance
 
