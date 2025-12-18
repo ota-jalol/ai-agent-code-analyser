@@ -7,9 +7,11 @@ Multi-Agent AI System for Real-Time Code Analysis, Testing, and Auto-Fixing
 A comprehensive multi-agent AI system capable of analyzing entire projects written in JavaScript, TypeScript, and Dart. The system detects bugs, vulnerabilities, logical issues, performance problems, generates automated tests, runs them, produces reports, and applies fixes automatically.
 
 ### Base Model
-- **Qwen2.5-Coder** (optimized for code understanding, generation, refactoring)
-- Compatible with local embeddings and vector databases (Qdrant/Weaviate)
-- RAG pipelines for code + documentation context
+- **Nemotron 3 nano** (NVIDIA's optimized small language model for code understanding and generation)
+- AI-powered intelligent agent orchestration and decision-making
+- Compatible with local deployment and NVIDIA AI Endpoints
+- Fallback to rule-based analysis when AI model is not available
+- RAG pipelines for code + documentation context (coming soon)
 
 ## 🧩 Architecture
 
@@ -52,10 +54,114 @@ A comprehensive multi-agent AI system capable of analyzing entire projects writt
 
 7. **Supervisor Agent**
    - Manages all agents
-   - Delegates tasks
+   - Delegates tasks with AI-powered decision making via Nemotron 3 nano
    - Ensures correct workflow order
-   - Evaluates conflicting results
+   - Evaluates conflicting results intelligently
    - Maintains real-time operation mode
+   - Provides intelligent prioritization based on analysis results
+
+## 🚀 Getting Started / Ishga Tushirish
+
+### Quick Start (5 minutes)
+
+Follow these steps to get the system running:
+
+#### 1. Prerequisites / Talablar
+```bash
+# Ensure you have Node.js 18+ installed
+node --version  # Should be 18.0.0 or higher
+
+# Ensure you have npm or pnpm installed
+npm --version   # or
+pnpm --version
+```
+
+#### 2. Clone and Install / Yuklab Olish va O'rnatish
+```bash
+# Clone the repository
+git clone https://github.com/ota-jalol/ai-agent-code-analyser.git
+cd ai-agent-code-analyser
+
+# Install dependencies
+npm install
+# or with pnpm (recommended / tavsiya etiladi)
+pnpm install
+```
+
+#### 3. Build the Project / Loyihani Qurish
+```bash
+# Build TypeScript to JavaScript
+npm run build
+# or
+pnpm build
+```
+
+#### 4. Run Your First Analysis / Birinchi Tahlilni Ishga Tushirish
+
+**Option A: Analyze without AI (fastest, no setup required)**
+```bash
+# Analyze your project (replace ./your-project with your path)
+npm start analyze ./your-project --output ./results --format html
+
+# Uzbekcha: O'z loyihangizni tahlil qiling
+# ./your-project ni o'z loyiha yo'lingiz bilan almashtiring
+```
+
+**Option B: With AI (Nemotron 3 nano)**
+```bash
+# 1. Get API key from https://build.nvidia.com/
+# 2. Set environment variable
+export NEMOTRON_API_KEY=your_api_key_here
+
+# 3. Run analysis with AI
+npm start analyze ./your-project --output ./results --format html
+
+# Uzbekcha: AI bilan tahlil
+# 1. https://build.nvidia.com/ saytidan API kalitini oling
+# 2. Muhit o'zgaruvchisini sozlang
+# 3. Tahlilni ishga tushiring
+```
+
+#### 5. View Results / Natijalarni Ko'rish
+```bash
+# Open the HTML report in your browser
+open ./results/reports/report-*.html
+# or on Linux
+xdg-open ./results/reports/report-*.html
+
+# Uzbekcha: Hisobot faylini brauzeringizda oching
+```
+
+### Complete Example / To'liq Misol
+
+```bash
+# Full workflow / To'liq jarayon
+git clone https://github.com/ota-jalol/ai-agent-code-analyser.git
+cd ai-agent-code-analyser
+npm install
+npm run build
+npm start analyze ./src --output ./my-results --format html
+open ./my-results/reports/report-*.html
+```
+
+### Common Commands / Umumiy Buyruqlar
+
+```bash
+# Basic analysis / Oddiy tahlil
+npm start analyze ./path/to/project
+
+# With tests / Testlar bilan
+npm start analyze ./path/to/project --run-tests
+
+# With auto-fixes / Avtomatik tuzatishlar bilan
+npm start analyze ./path/to/project --apply-fixes
+
+# Specific language / Muayyan til
+npm start analyze ./path/to/project --languages typescript
+
+# JSON format / JSON formati
+npm start analyze ./path/to/project --format json
+```
 
 ## 🚀 Installation
 
@@ -75,6 +181,49 @@ yarn install
 ```bash
 pnpm build
 ```
+
+## 🤖 AI Model Configuration
+
+### Nemotron 3 nano Setup
+
+The system uses NVIDIA's Nemotron 3 nano for intelligent agent management and decision-making.
+
+#### Option 1: NVIDIA AI Endpoints (Recommended)
+
+```bash
+# Get your API key from https://build.nvidia.com/
+export NEMOTRON_API_ENDPOINT=https://integrate.api.nvidia.com/v1
+export NEMOTRON_API_KEY=your_api_key_here
+```
+
+#### Option 2: Local Deployment
+
+```bash
+# Run Nemotron locally (requires NVIDIA GPU)
+export NEMOTRON_API_ENDPOINT=http://localhost:8000
+export NEMOTRON_API_KEY=local
+```
+
+#### Option 3: Without AI (Fallback Mode)
+
+The system works without AI configuration, using rule-based analysis:
+
+```bash
+# Simply run without setting NEMOTRON_API_KEY
+# The system will use traditional static analysis
+pnpm start analyze ./path/to/project
+```
+
+### Configuration File
+
+Create a `.env` file in the project root:
+
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+**For detailed AI configuration, see [NEMOTRON_GUIDE.md](NEMOTRON_GUIDE.md)**
 
 ## 🔧 Usage
 
@@ -119,7 +268,18 @@ import { analyzeProject, createDefaultConfig } from 'ai-agent-code-analyser';
 
 const config = createDefaultConfig('./path/to/project');
 
-// Customize configuration
+// Configure AI model (Nemotron 3 nano)
+config.model = {
+  provider: 'nemotron',
+  modelName: 'nemotron-3-nano',
+  apiEndpoint: 'https://integrate.api.nvidia.com/v1',
+  apiKey: process.env.NEMOTRON_API_KEY,
+  temperature: 0.7,
+  maxTokens: 2048,
+  enabled: true,
+};
+
+// Customize other settings
 config.generateTests = true;
 config.runTests = true;
 config.applyFixes = false;
@@ -129,6 +289,15 @@ const report = await analyzeProject(config);
 
 console.log(`Found ${report.vulnerabilityReport.totalVulnerabilities} vulnerabilities`);
 ```
+
+### AI-Powered Features
+
+When Nemotron 3 nano is enabled:
+- **Intelligent Prioritization**: AI decides which issues to address first
+- **Context-Aware Analysis**: Better understanding of code intent
+- **Smart Test Generation**: AI generates more comprehensive test cases
+- **Vulnerability Assessment**: Reduced false positives through AI verification
+- **Adaptive Workflow**: Dynamic decision-making based on analysis results
 
 ## 📊 Output
 
@@ -215,6 +384,7 @@ The system automatically generates:
 
 ## 🛠 Technology Stack
 
+- **AI Model**: Nemotron 3 nano (NVIDIA)
 - **TypeScript** - Type-safe implementation
 - **Babel Parser** - JavaScript/TypeScript AST parsing
 - **Vitest** - Modern test framework
@@ -224,6 +394,7 @@ The system automatically generates:
 
 ## 🎯 Behavior Rules
 
+- AI-powered intelligent decision-making when Nemotron is enabled
 - Always check full project context before generating tests or fixes
 - Always produce structured output
 - Never guess file structure; use real scanned structure
@@ -285,7 +456,89 @@ pnpm start analyze ./mening-proyektim \
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [CWE List](https://cwe.mitre.org/)
-- [Qwen2.5-Coder](https://github.com/QwenLM/Qwen2.5-Coder)
+- [Nemotron 3 nano](https://build.nvidia.com/) - NVIDIA AI Endpoints
+- [Nemotron Models](https://developer.nvidia.com/nemotron) - NVIDIA Developer
+
+## 🐛 Troubleshooting / Muammolarni Hal Qilish
+
+### Common Issues / Keng Tarqalgan Muammolar
+
+#### "Module not found" error
+```bash
+# Solution: Make sure you built the project
+npm run build
+
+# Yechim: Loyiha qurilganiga ishonch hosil qiling
+pnpm build
+```
+
+#### "Command not found: ai-code-analyser"
+```bash
+# Solution: Use npm start instead
+npm start analyze ./your-project
+
+# Yechim: npm start dan foydalaning
+```
+
+#### Build fails with TypeScript errors
+```bash
+# Solution: Clean and reinstall dependencies
+rm -rf node_modules dist
+npm install
+npm run build
+
+# Yechim: Bog'liqliklarni qayta o'rnating
+```
+
+#### AI features not working
+```bash
+# Solution: Check your API key is set
+echo $NEMOTRON_API_KEY
+
+# If empty, set it:
+export NEMOTRON_API_KEY=your_key_here
+
+# Yechim: API kalitingiz o'rnatilganligini tekshiring
+```
+
+#### Analysis runs but finds no files
+```bash
+# Solution: Check your path is correct
+ls ./path/to/project
+
+# Make sure the path contains .js, .ts, or .dart files
+# node_modules folders are automatically excluded
+
+# Yechim: Yo'lingiz to'g'riligini tekshiring
+```
+
+#### Permission denied errors
+```bash
+# Solution: Check file permissions
+chmod +x dist/cli.js
+
+# Or run with node explicitly
+node dist/cli.js analyze ./project
+
+# Yechim: Fayl ruxsatlarini tekshiring
+```
+
+### Getting Help / Yordam Olish
+
+If you encounter issues:
+1. Check the [QUICKSTART.md](QUICKSTART.md) guide
+2. Review [NEMOTRON_GUIDE.md](NEMOTRON_GUIDE.md) for AI setup
+3. Check [ARCHITECTURE.md](ARCHITECTURE.md) for technical details
+4. Open an issue on GitHub with:
+   - Your Node.js version (`node --version`)
+   - Error messages
+   - Steps to reproduce
+
+Agar muammoga duch kelsangiz:
+1. [QUICKSTART.md](QUICKSTART.md) qo'llanmasini ko'rib chiqing
+2. AI sozlash uchun [NEMOTRON_GUIDE.md](NEMOTRON_GUIDE.md) ni o'qing
+3. Texnik ma'lumotlar uchun [ARCHITECTURE.md](ARCHITECTURE.md) ga qarang
+4. GitHub'da muammoni yozing (node versiyasi va xato xabarlarini kiriting)
 
 ## ⚡ Performance
 

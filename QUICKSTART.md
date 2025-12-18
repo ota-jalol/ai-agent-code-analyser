@@ -18,6 +18,28 @@ pnpm build
 npm run build
 ```
 
+## AI Model Setup (Optional but Recommended)
+
+### Configure Nemotron 3 nano
+
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Edit .env and add your Nemotron API key
+# Get your API key from: https://build.nvidia.com/
+```
+
+**With AI (Recommended)**:
+```bash
+export NEMOTRON_API_KEY=your_api_key_here
+export NEMOTRON_API_ENDPOINT=https://integrate.api.nvidia.com/v1
+```
+
+**Without AI (Fallback Mode)**:
+- Skip the environment setup
+- System will use rule-based analysis
+
 ## Basic Usage
 
 ### 1. Analyze a Project
@@ -174,14 +196,39 @@ node dist/cli.js analyze $(pwd)/my-project
 
 **Solution**: The system automatically excludes `node_modules`, `dist`, `build`, etc.
 
+### Issue: AI features not working
+
+**Solution**: Check your Nemotron API configuration:
+```bash
+# Verify environment variables are set
+echo $NEMOTRON_API_KEY
+echo $NEMOTRON_API_ENDPOINT
+
+# Test API connectivity
+curl -H "Authorization: Bearer $NEMOTRON_API_KEY" \
+  $NEMOTRON_API_ENDPOINT/v1/models
+```
+
 ## Advanced Usage
 
-### Programmatic API
+### Programmatic API with AI
 
 ```typescript
 import { analyzeProject, createDefaultConfig } from 'ai-agent-code-analyser';
 
 const config = createDefaultConfig('./my-project');
+
+// Enable AI-powered features
+config.model = {
+  provider: 'nemotron',
+  modelName: 'nemotron-3-nano',
+  apiEndpoint: process.env.NEMOTRON_API_ENDPOINT,
+  apiKey: process.env.NEMOTRON_API_KEY,
+  temperature: 0.7,
+  maxTokens: 2048,
+  enabled: true,
+};
+
 config.reportFormat = 'json';
 config.generateTests = true;
 
@@ -212,7 +259,11 @@ jobs:
           node-version: 18
       - run: npm install
       - run: npm run build
+      # Optional: Use with Nemotron AI
       - run: node dist/cli.js analyze . --format json
+        env:
+          NEMOTRON_API_KEY: ${{ secrets.NEMOTRON_API_KEY }}
+          NEMOTRON_API_ENDPOINT: https://integrate.api.nvidia.com/v1
 ```
 
 ### GitLab CI
@@ -220,6 +271,9 @@ jobs:
 ```yaml
 code_analysis:
   stage: test
+  variables:
+    NEMOTRON_API_KEY: $NEMOTRON_API_KEY
+    NEMOTRON_API_ENDPOINT: https://integrate.api.nvidia.com/v1
   script:
     - npm install
     - npm run build
@@ -234,9 +288,11 @@ code_analysis:
 1. **Start with JSON format** for initial analysis to get structured data
 2. **Use HTML format** for sharing results with team members
 3. **Use Markdown format** for documentation and reports
-4. **Enable test generation** to get starter test suites
-5. **Review patches** before applying them automatically
-6. **Run regularly** in CI/CD for continuous monitoring
+4. **Enable AI features** with Nemotron for intelligent prioritization
+5. **Enable test generation** to get starter test suites
+6. **Review patches** before applying them automatically
+7. **Run regularly** in CI/CD for continuous monitoring
+8. **Use AI locally** if you have NVIDIA GPU for faster inference
 
 ## Support
 

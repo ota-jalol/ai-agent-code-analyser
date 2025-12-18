@@ -1,5 +1,6 @@
 import type { SystemConfig, FinalReport, WorkflowStatus } from '../types/index.js';
 import { Logger, writeFile, ensureDir } from '../utils/helpers.js';
+import { NemotronClient } from '../utils/NemotronClient.js';
 import { IngestorAgent } from './IngestorAgent.js';
 import { AnalyzerAgent } from './AnalyzerAgent.js';
 import { VulnerabilityAgent } from './VulnerabilityAgent.js';
@@ -12,11 +13,13 @@ import * as path from 'path';
  * Supervisor Agent
  * Responsible for managing all agents, delegating tasks,
  * ensuring correct workflow order, evaluating results
+ * Now powered by Nemotron 3 nano for AI-driven decision making
  */
 export class SupervisorAgent {
   private logger: Logger;
   private config: SystemConfig;
   private workflowStatus: WorkflowStatus;
+  private nemotronClient?: NemotronClient;
 
   constructor(config: SystemConfig) {
     this.logger = Logger.getInstance();
@@ -27,6 +30,12 @@ export class SupervisorAgent {
       message: 'Initializing workflow',
       errors: [],
     };
+
+    // Initialize Nemotron client if configured
+    if (config.model && config.model.enabled) {
+      this.nemotronClient = new NemotronClient(config.model);
+      this.logger.info('Nemotron 3 nano AI model enabled for intelligent agent management');
+    }
   }
 
   async execute(): Promise<FinalReport> {
@@ -60,10 +69,39 @@ export class SupervisorAgent {
       const analysisReport = await analyzerAgent.analyze(projectStructure, this.config.projectPath);
       this.logger.success(`Found ${analysisReport.totalIssues} issues`);
 
+      // AI Decision Point: Let Nemotron assess analysis results
+      if (this.nemotronClient?.isAvailable()) {
+        const decision = await this.nemotronClient.getAgentDecision({
+          stage: 'post-analysis',
+          currentResults: { totalIssues: analysisReport.totalIssues },
+          projectInfo: { files: projectStructure.files.length }
+        });
+        this.logger.info(`Nemotron Decision: ${decision.reasoning}`);
+      }
+
       // Stage 3: Scan for vulnerabilities
       this.updateStatus('scan', 40, 'Scanning for vulnerabilities...');
       const vulnerabilityReport = await vulnerabilityAgent.scan(projectStructure, this.config.projectPath);
       this.logger.success(`Found ${vulnerabilityReport.totalVulnerabilities} vulnerabilities`);
+
+      // AI Decision Point: Let Nemotron assess security priorities
+      if (this.nemotronClient?.isAvailable()) {
+        const decision = await this.nemotronClient.getAgentDecision({
+          stage: 'post-vulnerability-scan',
+          currentResults: { 
+            vulnerabilities: vulnerabilityReport.totalVulnerabilities,
+            critical: vulnerabilityReport.criticalCount,
+            high: vulnerabilityReport.highCount
+          },
+          projectInfo: { files: projectStructure.files.length }
+        });
+        this.logger.info(`Nemotron Security Assessment: ${decision.reasoning}`);
+        
+        // AI can recommend whether to continue or prioritize fixes
+        if (decision.priority === 'critical' && vulnerabilityReport.criticalCount > 0) {
+          this.logger.warn('Nemotron recommends addressing critical vulnerabilities immediately');
+        }
+      }
 
       // Stage 4: Generate tests (if enabled)
       let testSuites;
